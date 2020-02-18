@@ -2,6 +2,7 @@ package pinger4
 
 import (
 	"context"
+	"errors"
 	"strconv"
 	"sync"
 	"time"
@@ -10,14 +11,17 @@ import (
 )
 
 // Run is Pinger start
-func (thisPinger *Pinger) Run(ctx context.Context) {
-	select {
-	case <-thisPinger.isStarted:
-		thisPinger.logger.Log(labelinglog.FlgWarn, "Pinger has already started")
-		return
-	default:
-		close(thisPinger.isStarted)
+func (thisPinger *Pinger) Run(ctx context.Context) error {
+	thisPinger.isStarted.Lock()
+	if thisPinger.isStarted.flg {
+		defer thisPinger.isStarted.Unlock()
+
+		msg := "Pinger has already started"
+		thisPinger.logger.Log(labelinglog.FlgWarn, msg)
+		return errors.New(msg)
 	}
+	thisPinger.isStarted.flg = true
+	thisPinger.isStarted.Unlock()
 
 	defer thisPinger.logger.Log(labelinglog.FlgNotice, "finish Pinger")
 	thisPinger.logger.Log(labelinglog.FlgNotice, "start Pinger")
@@ -52,12 +56,15 @@ func (thisPinger *Pinger) Run(ctx context.Context) {
 		go thisPinger.debugStatus(childCtx, &wgChild)
 	}
 
+	resError := error(nil)
 	select {
 	case <-ctx.Done():
 		thisPinger.logger.Log(labelinglog.FlgDebug, "stop request from parent")
 	case <-childCtx.Done():
 		thisPinger.logger.Log(labelinglog.FlgDebug, "stop request from child")
-		thisPinger.logger.Log(labelinglog.FlgError, "may be fatal error (´・ω・`)")
+		msg := "may be fatal error (´・ω・`)"
+		thisPinger.logger.Log(labelinglog.FlgError, msg)
+		resError = errors.New(msg)
 	}
 
 	thisPinger.logger.Log(labelinglog.FlgDebug, "stop request to all chlid")
@@ -75,11 +82,17 @@ func (thisPinger *Pinger) Run(ctx context.Context) {
 		case <-c:
 			thisPinger.logger.Log(labelinglog.FlgNotice, "terminated successfully")
 		case <-time.After(time.Duration(terminateTimeOutSec) * time.Second):
-			thisPinger.logger.Log(labelinglog.FlgError, "forced termination")
+			msg := "forced termination"
+			thisPinger.logger.Log(labelinglog.FlgError, msg)
+			if resError == nil {
+				resError = errors.New(msg)
+			}
 		}
 
 		thisPinger.logger.Log(labelinglog.FlgDebug, "chIcmpResponse        "+strconv.Itoa(len(thisPinger.chIcmpResponse)))
 		thisPinger.logger.Log(labelinglog.FlgDebug, "chIcmpResponseTimeout "+strconv.Itoa(len(thisPinger.chIcmpResponseTimeout)))
 		thisPinger.logger.Log(labelinglog.FlgDebug, "chIcmpResult          "+strconv.Itoa(len(thisPinger.chIcmpResult)))
 	}
+
+	return resError
 }

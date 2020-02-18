@@ -26,7 +26,10 @@ type Pinger struct {
 		}
 	}
 
-	isStarted  chan struct{}
+	isStarted struct {
+		sync.Mutex
+		flg bool
+	}
 	cancelFunc context.CancelFunc
 
 	chIcmpResponse        chan icmpResponse
@@ -71,7 +74,12 @@ func New(icmpID int, pingerConfig Config) Pinger {
 			}
 		}),
 
-		isStarted:  make(chan struct{}),
+		isStarted: struct {
+			sync.Mutex
+			flg bool
+		}{
+			flg: false,
+		},
 		cancelFunc: func() {},
 
 		chIcmpResponse:        make(chan icmpResponse, pingerConfig.MaxWorkers*2),

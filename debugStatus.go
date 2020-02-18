@@ -19,7 +19,7 @@ func (thisPinger *Pinger) debugStatus(ctx context.Context, wg *sync.WaitGroup) {
 		select {
 		case <-ctx.Done():
 			return
-		case <-time.After(time.Second):
+		case <-time.After(time.Duration(thisPinger.config.DebugPrintIntervalSec) * time.Second):
 			timeouterCount := atomic.LoadInt64(&thisPinger.status.timeouterCounter)
 			thisPinger.logger.Log(labelinglog.FlgDebug, "waiting timeouter "+strconv.FormatInt(timeouterCount, 10))
 
