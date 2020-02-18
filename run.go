@@ -2,6 +2,7 @@ package pinger4
 
 import (
 	"context"
+	"errors"
 	"strconv"
 	"sync"
 	"time"
@@ -10,11 +11,12 @@ import (
 )
 
 // Run is Pinger start
-func (thisPinger *Pinger) Run(ctx context.Context) {
+func (thisPinger *Pinger) Run(ctx context.Context) error {
 	select {
 	case <-thisPinger.isStarted:
-		thisPinger.logger.Log(labelinglog.FlgWarn, "Pinger has already started")
-		return
+		msg := "Pinger has already started"
+		thisPinger.logger.Log(labelinglog.FlgWarn, msg)
+		return errors.New(msg)
 	default:
 		close(thisPinger.isStarted)
 	}
@@ -82,4 +84,6 @@ func (thisPinger *Pinger) Run(ctx context.Context) {
 		thisPinger.logger.Log(labelinglog.FlgDebug, "chIcmpResponseTimeout "+strconv.Itoa(len(thisPinger.chIcmpResponseTimeout)))
 		thisPinger.logger.Log(labelinglog.FlgDebug, "chIcmpResult          "+strconv.Itoa(len(thisPinger.chIcmpResult)))
 	}
+
+	return nil
 }
