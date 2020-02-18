@@ -12,14 +12,16 @@ import (
 
 // Run is Pinger start
 func (thisPinger *Pinger) Run(ctx context.Context) error {
-	select {
-	case <-thisPinger.isStarted:
+	thisPinger.isStarted.Lock()
+	if thisPinger.isStarted.flg {
+		defer thisPinger.isStarted.Unlock()
+
 		msg := "Pinger has already started"
 		thisPinger.logger.Log(labelinglog.FlgWarn, msg)
 		return errors.New(msg)
-	default:
-		close(thisPinger.isStarted)
 	}
+	thisPinger.isStarted.flg = true
+	thisPinger.isStarted.Unlock()
 
 	defer thisPinger.logger.Log(labelinglog.FlgNotice, "finish Pinger")
 	thisPinger.logger.Log(labelinglog.FlgNotice, "start Pinger")

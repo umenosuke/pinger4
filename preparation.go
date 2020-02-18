@@ -12,12 +12,12 @@ import (
 
 // AddTarget is AddTarget
 func (thisPinger *Pinger) AddTarget(ipAddress string, comment string) error {
-	select {
-	case <-thisPinger.isStarted:
+	thisPinger.isStarted.Lock()
+	defer thisPinger.isStarted.Unlock()
+	if thisPinger.isStarted.flg {
 		msg := "Pinger has already started"
 		thisPinger.logger.Log(labelinglog.FlgWarn, msg)
 		return errors.New(msg)
-	default:
 	}
 
 	binIPAddress := net.ParseIP(ipAddress)
@@ -91,12 +91,12 @@ func (thisPinger *Pinger) AddTarget(ipAddress string, comment string) error {
 
 //SetLogEnableLevel a
 func (thisPinger *Pinger) SetLogEnableLevel(targetLevelFlgs labelinglog.LogLevel) error {
-	select {
-	case <-thisPinger.isStarted:
+	thisPinger.isStarted.Lock()
+	defer thisPinger.isStarted.Unlock()
+	if thisPinger.isStarted.flg {
 		msg := "Pinger has already started"
 		thisPinger.logger.Log(labelinglog.FlgWarn, msg)
 		return errors.New(msg)
-	default:
 	}
 
 	thisPinger.logger.SetEnableLevel(targetLevelFlgs)
@@ -105,12 +105,12 @@ func (thisPinger *Pinger) SetLogEnableLevel(targetLevelFlgs labelinglog.LogLevel
 
 //SetLogWriter a
 func (thisPinger *Pinger) SetLogWriter(targetLevelFlgs labelinglog.LogLevel, writer io.Writer) error {
-	select {
-	case <-thisPinger.isStarted:
+	thisPinger.isStarted.Lock()
+	defer thisPinger.isStarted.Unlock()
+	if thisPinger.isStarted.flg {
 		msg := "Pinger has already started"
 		thisPinger.logger.Log(labelinglog.FlgWarn, msg)
 		return errors.New(msg)
-	default:
 	}
 
 	thisPinger.logger.SetIoWriter(targetLevelFlgs, writer)
