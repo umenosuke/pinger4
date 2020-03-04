@@ -7,7 +7,7 @@ import (
 	"sync"
 	"time"
 
-	"umenosuke.net/labelinglog"
+	"github.com/umenosuke/labelinglog"
 )
 
 // Run is Pinger start

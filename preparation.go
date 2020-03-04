@@ -7,7 +7,7 @@ import (
 	"net"
 	"sync"
 
-	"umenosuke.net/labelinglog"
+	"github.com/umenosuke/labelinglog"
 )
 
 // AddTarget is AddTarget

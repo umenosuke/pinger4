@@ -4,7 +4,7 @@ import (
 	"context"
 	"sync"
 
-	"umenosuke.net/labelinglog"
+	"github.com/umenosuke/labelinglog"
 )
 
 func (thisPinger *Pinger) statistics(ctx context.Context, wg *sync.WaitGroup) {
