@@ -14,7 +14,7 @@ import (
 	"golang.org/x/net/icmp"
 	"golang.org/x/net/ipv4"
 
-	"umenosuke.net/labelinglog"
+	"github.com/umenosuke/labelinglog"
 )
 
 func (thisPinger *Pinger) broker(ctx context.Context, wg *sync.WaitGroup) {

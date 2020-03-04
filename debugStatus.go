@@ -7,7 +7,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"umenosuke.net/labelinglog"
+	"github.com/umenosuke/labelinglog"
 )
 
 func (thisPinger *Pinger) debugStatus(ctx context.Context, wg *sync.WaitGroup) {
