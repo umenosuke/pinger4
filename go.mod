@@ -1,4 +1,4 @@
-module umenosuke.net/pinger4
+module github.com/umenosuke/pinger4
 
 go 1.13
 
