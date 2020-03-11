@@ -95,6 +95,9 @@ func (thisPinger *Pinger) sendIcmpInterval(ctx context.Context, wg *sync.WaitGro
 		}
 	}
 
+	ticker := time.NewTicker(time.Duration(thisPinger.config.IntervalMillisec) * time.Millisecond)
+	defer ticker.Stop()
+
 	data := &tICMPData{}
 	wmbd := bytes.NewBuffer(make([]byte, 12))
 	wmb := &icmp.Echo{
@@ -150,7 +153,7 @@ func (thisPinger *Pinger) sendIcmpInterval(ctx context.Context, wg *sync.WaitGro
 		case <-ctx.Done():
 			thisPinger.logger.Log(labelinglog.FlgDebug, "(id "+strconv.FormatInt(myID, 10)+")"+" stop request received")
 			return
-		case <-time.After(time.Duration(thisPinger.config.IntervalMillisec) * time.Millisecond):
+		case <-ticker.C:
 		}
 	}
 }
